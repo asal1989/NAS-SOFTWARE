@@ -14,6 +14,7 @@ function currentPathFromLocation(pathname) {
   const prefix = '/files';
   let p = pathname.startsWith(prefix) ? pathname.slice(prefix.length) : '/';
   if (!p) p = '/';
+  try { p = decodeURIComponent(p); } catch { /* leave as-is if malformed */ }
   return p;
 }
 
@@ -57,6 +58,7 @@ export default function Files() {
       setItems(sorted);
     } catch (e) {
       setError(e.message);
+      setItems([]);
     } finally {
       setLoading(false);
     }

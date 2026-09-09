@@ -5,6 +5,7 @@ const path = require('path');
 const multer = require('multer');
 const { authRequired } = require('../middleware/auth');
 const { resolveSafePath, isPathAllowed } = require('../storage');
+const { notify } = require('../mailer');
 
 const router = express.Router();
 router.use(authRequired);
@@ -73,7 +74,9 @@ router.post('/upload', checkAccess, upload.array('files'), async (req, res) => {
       const dest = path.join(req.safePath, path.basename(file.originalname));
       await fsp.writeFile(dest, file.buffer);
     }
-    res.json({ ok: true, uploaded: (req.files || []).map((f) => f.originalname) });
+    const names = (req.files || []).map((f) => f.originalname);
+    res.json({ ok: true, uploaded: names });
+    notify('upload', { File: names.join(', '), Folder: req.relPath }, req.user.username);
   } catch (e) {
     res.status(500).json({ error: 'Upload failed' });
   }
@@ -86,6 +89,7 @@ router.post('/mkdir', checkAccess, async (req, res) => {
   try {
     await fsp.mkdir(path.join(req.safePath, name), { recursive: false });
     res.json({ ok: true });
+    notify('mkdir', { Folder: `${req.relPath}/${name}` }, req.user.username);
   } catch (e) {
     if (e.code === 'EEXIST') return res.status(409).json({ error: 'Folder already exists' });
     res.status(500).json({ error: 'Failed to create folder' });
@@ -97,6 +101,7 @@ router.delete('/delete', checkAccess, async (req, res) => {
   try {
     await fsp.rm(req.safePath, { recursive: true, force: false });
     res.json({ ok: true });
+    notify('delete', { Path: req.relPath }, req.user.username);
   } catch (e) {
     res.status(500).json({ error: 'Delete failed' });
   }
@@ -114,6 +119,7 @@ router.post('/rename', async (req, res) => {
     const dest = path.join(path.dirname(src), newName);
     await fsp.rename(src, dest);
     res.json({ ok: true });
+    notify('rename', { From: relPath, To: newName }, req.user.username);
   } catch (e) {
     res.status(500).json({ error: 'Rename failed' });
   }
@@ -133,6 +139,7 @@ router.post('/move', async (req, res) => {
     const dest = resolveSafePath(newPath);
     await fsp.rename(src, dest);
     res.json({ ok: true });
+    notify('move', { From: relPath, To: newPath }, req.user.username);
   } catch (e) {
     res.status(500).json({ error: 'Move failed' });
   }
