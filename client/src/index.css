@@ -124,6 +124,13 @@ input, select {
 .auth-card button[type="submit"]:hover {
   background: var(--accent-hover);
 }
+.auth-footer {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.6;
+}
 
 /* --- Shell --- */
 .app-shell {
@@ -156,6 +163,15 @@ input, select {
 }
 .topbar nav a:hover {
   color: var(--accent);
+}
+.site-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--panel);
+  text-align: center;
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.6;
 }
 .username {
   color: var(--text);

@@ -46,6 +46,7 @@ export default function Login() {
         <button type="submit" disabled={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
+        <p className="auth-footer">Developed by Dheeprix Solutions</p>
       </form>
     </div>
   );
